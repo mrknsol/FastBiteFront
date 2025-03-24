@@ -1,0 +1,41 @@
+.buttons-block {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.btn-block {
+  flex: 1;
+  max-width: 230px;
+  min-height: 50px;
+  padding: 10px 15px;
+  font-family: "Ubuntu Mono", sans-serif;
+  font-size: 1.125rem;
+  border-radius: 7px;
+  color: black;
+  border: 2px solid black;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-wrap: nowrap;
+}
+
+
+
+
+
+.btn-block:hover {
+  transform: scale(1.03);
+}
+
+.btn-block:active {
+  transform: scale(0.95);
+}

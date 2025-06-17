@@ -19,7 +19,6 @@ import {
   createParty, 
   getParty, 
   getPartyCart,
-  selectPartyCart,
   selectPartyData,
   leaveParty,
   removeFromPartyCart
@@ -45,10 +44,10 @@ export const OrderPage = () => {
 
   const order = useSelector((state) => {
     const currentPartyId = localStorage.getItem('currentPartyId');
-    console.log('Current party ID:', currentPartyId); // Для отладки
-    console.log('State products:', state.products.products); // Для отладки
-    console.log('State order:', state.order.order); // Для отладки
-    console.log('State party cart:', state.party.partyCart); // Для отладки
+    console.log('Current party ID:', currentPartyId); 
+    console.log('State products:', state.products.products);
+    console.log('State order:', state.order.order);
+    console.log('State party cart:', state.party.partyCart); 
 
     if (currentPartyId) {
       return state.party.partyCart.map(productId => {
@@ -75,7 +74,6 @@ export const OrderPage = () => {
   const { clientId } = useSelector((state) => state.payment);
   const dispatch = useDispatch();
 
-  // Инициализация данных
   useEffect(() => {
     dispatch(fetchClientId());
     dispatch(fetchProducts());
@@ -159,7 +157,7 @@ export const OrderPage = () => {
                 await connection.invoke("LeavePartyGroup", currentPartyId);
                 console.log("Successfully left party group");
               } catch (err) {
-                console.log("Error leaving party group (expected during cleanup)");
+                console.log("Error leaving party group (expected during cleanup)", err);
               }
             }
             await connection.stop();
@@ -291,36 +289,31 @@ export const OrderPage = () => {
   const clearCartAfterPayment = async () => {
     try {
       const currentPartyId = localStorage.getItem('currentPartyId');
-      console.log('Clearing cart after payment. PartyId:', currentPartyId); // Для отладки
+      console.log('Clearing cart after payment. PartyId:', currentPartyId);
 
       if (currentPartyId) {
-        // Для групповой корзины
         await dispatch(clearCartParty({
           request: {
             partyId: currentPartyId
           }
         })).unwrap();
         
-        // Обновляем состояние корзины группы
         await dispatch(getPartyCart(currentPartyId));
         
-        // Уведомляем других участников группы
         if (connectionRef.current?.state === signalR.HubConnectionState.Connected) {
           await connectionRef.current.invoke("NotifyPartyCartUpdated", currentPartyId);
         }
       } else {
-        // Для индивидуальной корзины
         await dispatch(clearCart({
           request: {
             userId: user.id
           }
         })).unwrap();
         
-        // Обновляем состояние индивидуальной корзины
         await dispatch(fetchCartFromRedis({ userId: user.id }));
       }
 
-      console.log('Cart cleared successfully'); // Для отладки
+      console.log('Cart cleared successfully'); 
     } catch (error) {
       console.error("Error clearing cart after payment:", error);
     }
@@ -328,7 +321,6 @@ export const OrderPage = () => {
 
   const handlePaymentSuccess = async () => {
     try {
-      // Сохраняем данные заказа перед очисткой корзины
       const savedOrder = order.map(dish => ({
         name: getTranslation(dish).name,
         price: Number(dish.price),
@@ -338,20 +330,17 @@ export const OrderPage = () => {
       
       const savedTotal = totalPrice;
       
-      // Сохраняем данные для чека
       setReceiptData({
         order: savedOrder,
         totalPrice: savedTotal
       });
 
-      // Очищаем корзину
       await clearCartAfterPayment();
       
-      // Обновляем UI
       setPaymentFormVisible(false);
       setShowReceipt(true);
 
-      console.log('Payment processed successfully'); // Для отладки
+      console.log('Payment processed successfully'); 
     } catch (error) {
       console.error("Payment success handling error:", error);
     }
@@ -379,22 +368,23 @@ export const OrderPage = () => {
         alert(t("order.pleaseSelectTable"));
         return;
       }
-      
+  
       const result = await dispatch(createParty({
         ownerId: user.id,
-        tableId: parseInt(selectedTable)
+        tableId: parseInt(selectedTable),
       })).unwrap();
-      
-      console.log('Created party ID:', result);
-
+  
+      console.log("Created party ID:", result);
+  
       localStorage.setItem('currentPartyId', result);
       setCurrentPartyId(result);
       setIsInParty(true);
       setShowPartyModal(true);
-
+  
       if (connectionRef.current?.state === signalR.HubConnectionState.Connected) {
         await connectionRef.current.invoke("JoinPartyGroup", result);
       }
+  
     } catch (error) {
       console.error('Error creating party:', error);
       alert(t("order.errorCreatingParty"));
@@ -447,23 +437,23 @@ export const OrderPage = () => {
   const handleJoinPartySuccess = async (partyId) => {
     try {
       console.log('Joining party with ID:', partyId);
-      
+  
       localStorage.setItem('currentPartyId', partyId);
       setCurrentPartyId(partyId);
       setIsInParty(true);
-      
+  
       if (connectionRef.current?.state === signalR.HubConnectionState.Connected) {
         await connectionRef.current.invoke("JoinPartyGroup", partyId);
       }
-      
+  
       dispatch(getPartyCart(partyId));
       setShowJoinModal(false);
       setShowPartyModal(true);
     } catch (error) {
       console.error('Error after joining party:', error);
       localStorage.removeItem('currentPartyId');
-      setIsInParty(false);
       setCurrentPartyId(null);
+      setIsInParty(false);
     }
   };
 

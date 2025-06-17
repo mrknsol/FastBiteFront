@@ -313,5 +313,21 @@
       "title": "Masa №{{tableId}} (Tutum: {{capacity}} nəfər)",
       "noReservations": "Bu gün üçün rezervasiya yoxdur"
     }
+  },
+  "ai": {
+    "button": {
+      "label": "AI Köməkçi"
+    },
+    "input": {
+      "placeholder": "Məhsul tövsiyələri üçün soruşun..."
+    },
+    "send": "Göndər",
+    "sending": "Göndərilir...",
+    "error": {
+      "recommendation": "Tövsiyələr alınarkən xəta baş verdi"
+    },
+    "title": "Sü Köməkçi",
+    "category": "Kateqoriya",
+    "price": "Qiymət"
   }
 } 

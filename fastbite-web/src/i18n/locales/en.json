@@ -114,6 +114,22 @@
     "errorJoiningParty": "Failed to join party. Please check the code and try again.",
     "pleaseEnterCode": "Please enter a party code"
   },
+  "ai": {
+    "button": {
+      "label": "AI Assistant"
+    },
+    "input": {
+      "placeholder": "Ask for product recommendations..."
+    },
+    "send": "Send",
+    "sending": "Sending...",
+    "error": {
+      "recommendation": "Error getting recommendations"
+    },
+    "title": "AI Assistant",
+    "category": "Category",
+    "price": "Price"
+  },
   "auth": {
     "login": {
       "title": "Sign In",

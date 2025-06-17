@@ -7,9 +7,9 @@ import { addProductToCart } from '../../redux/reducers/orderSlice.js';
 import { addToPartyCart } from "../../redux/reducers/partySlice.js";
 import { Notification } from "../../components/Notification/Notification";
 import "./MenuPage.css";
-import { Link } from "react-router-dom";
 import  Loader from '../../components/Loader/Loader.jsx'
 import * as signalR from "@microsoft/signalr";
+import { AIProductChat } from "../../components/AIProductChat/AIProductChat";
 
 export const MenuPage = () => {
   const { t, i18n } = useTranslation();
@@ -34,7 +34,7 @@ export const MenuPage = () => {
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("http://localhost:5156/orderHub")
-      .withAutomaticReconnect([0, 2000, 5000, 10000, 20000]) 
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
@@ -106,6 +106,7 @@ export const MenuPage = () => {
     }, 3000);
   };
 
+
   const categories =
     products.length > 0
       ? [...new Set(products.map((product) => product.categoryName))]
@@ -138,6 +139,8 @@ export const MenuPage = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+
 
   const getTranslation = (product) => {
     const translation = product.translations.find(
@@ -234,6 +237,9 @@ export const MenuPage = () => {
         </div>
         </>
       )}
+      </div>
+      <div className="MenuPage__ai-chat-container">
+        <AIProductChat />
       </div>
       <Notification
         message={notification.message}

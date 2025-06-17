@@ -42,15 +42,12 @@ export const PaymentForm = ({ totalPrice, onSuccess, onCancel, clientId, orderDa
   const handleCardPayment = async (e) => {
     e.preventDefault();
     try {
-      // Проверяем, откуда пришел заказ (из резервации или обычного заказа)
       const transformedOrderData = orderData.productNames ? 
-        // Для резервации
         {
           userId: orderData.userId,
           tableNumber: orderData.tableNumber,
-          productNames: orderData.productNames // Уже в правильном формате
+          productNames: orderData.productNames
         } :
-        // Для обычного заказа
         {
           userId: orderData.userId,
           tableNumber: orderData.tableNumber,
@@ -73,7 +70,6 @@ export const PaymentForm = ({ totalPrice, onSuccess, onCancel, clientId, orderDa
   const handleCashPayment = async () => {
     try {
       const transformedOrderData = orderData.productNames ? 
-        // Для резервации
         {
           userId: orderData.userId,
           tableNumber: orderData.tableNumber,
@@ -81,7 +77,6 @@ export const PaymentForm = ({ totalPrice, onSuccess, onCancel, clientId, orderDa
           paymentType: Number(PaymentType.CASH),
           isPaid: false
         } :
-        // Для обычного заказа
         {
           userId: orderData.userId,
           tableNumber: orderData.tableNumber,
@@ -208,7 +203,6 @@ export const PaymentForm = ({ totalPrice, onSuccess, onCancel, clientId, orderDa
             onApprove={(data, actions) => {
               return actions.order.capture().then((details) => {
                 const transformedOrderData = orderData.productNames ? 
-                  // Для резервации
                   {
                     userId: orderData.userId,
                     tableNumber: orderData.tableNumber,
@@ -216,7 +210,6 @@ export const PaymentForm = ({ totalPrice, onSuccess, onCancel, clientId, orderDa
                     paymentType: PaymentType.ONLINE,
                     isPaid: true
                   } :
-                  // Для обычного заказа
                   {
                     userId: orderData.userId,
                     tableNumber: orderData.tableNumber,

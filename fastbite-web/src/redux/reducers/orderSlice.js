@@ -228,7 +228,7 @@ export const clearCartParty = createAsyncThunk(
 
 export const fetchCartFromRedis = createAsyncThunk(
   "order/fetchCart",
-  async (userId, { dispatch, rejectWithValue }) => {
+  async (userId, { rejectWithValue }) => {
     try {
       const apiData = {
         Url: `${baseUrl}/api/v1/Cart/userCart?userId=${userId.userId}`,

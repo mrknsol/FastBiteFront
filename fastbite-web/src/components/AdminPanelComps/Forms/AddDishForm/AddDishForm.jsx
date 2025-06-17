@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { uploadProductImage, createProduct, fetchCategories } from "../../../../redux/reducers/productSlice";
+import { fetchProductTags } from "../../../../redux/reducers/productTagsSlice";
 import "./AddDishForm.css";
+import Select from 'react-select';
+import { t } from "i18next";
 
 export const AddDishForm = ({ closeModal }) => {
   const dispatch = useDispatch();
   const productState = useSelector((state) => state.products);
+  const productTagsState = useSelector((state) => state.productTags);
 
   const categories = productState?.categories || [];
+  const tags = productTagsState?.tags || [];
   const status = productState?.status || 'idle';
   const error = productState?.error;
+  const currentLang = t.language || 'en';
 
   const [dishName, setDishName] = useState({ default: "", ru: "", az: "" });
   const [dishDescription, setDishDescription] = useState({
@@ -23,9 +29,55 @@ export const AddDishForm = ({ closeModal }) => {
   const [imageFile, setImageFile] = useState(null);
   const [openAccordion, setOpenAccordion] = useState("default");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const tagOptions = tags.map(tag => {
+    let translation = tag.translations.find(t => t.languageCode === currentLang);
+  
+    if (!translation) {
+      translation = tag.translations.find(t => t.languageCode === 'en');
+    }
+  
+    if (!translation && tag.translations.length > 0) {
+      translation = tag.translations[0];
+    }
+  
+    return {
+      value: tag.id,
+      label: translation ? translation.name : tag.id
+    };
+  });
+
+  const customStyles = {
+    control: (base) => ({
+      ...base,
+      backgroundColor: '#fff',
+      borderColor: '#ddd',
+      '&:hover': {
+        borderColor: '#999'
+      }
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: '#e8f0fe',
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: '#1a73e8',
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: '#1a73e8',
+      '&:hover': {
+        backgroundColor: '#d2e3fc',
+        color: '#1a73e8',
+      },
+    }),
+  };
 
   useEffect(() => {
     dispatch(fetchCategories());
+    dispatch(fetchProductTags());
   }, [dispatch]);
 
   const maxDescriptionLength = 300;
@@ -115,13 +167,25 @@ export const AddDishForm = ({ closeModal }) => {
         }
       ];
 
+      const formattedTags = selectedTags.map(tag => ({
+        id: tag.value,
+        translations: [
+          {
+            languageCode: "en", 
+            name: tag.label
+          }
+        ]
+      }));
+
       const productData = {
+        id: "00000000-0000-0000-0000-000000000000",
         categoryName: selectedCategory,
-        price: parseInt(dishPrice),
         imageUrl: imageUrl,
-        translations: translations
+        price: parseInt(dishPrice),
+        translations: translations,
+        productTags: formattedTags
       };
-      console.log("productData", productData);
+      console.log("Sending product data:", productData);
 
       console.log('Current state before dispatch:', {
         selectedCategory,
@@ -133,7 +197,7 @@ export const AddDishForm = ({ closeModal }) => {
       });
 
       await dispatch(createProduct(productData)).unwrap();
-      console.log('Product created successfully');
+      console.log('Product Created Succesfully');
 
       closeModal();
       setDishName({ default: "", ru: "", az: "" });
@@ -142,6 +206,7 @@ export const AddDishForm = ({ closeModal }) => {
       setSelectedCategory("");
       setDishImage(null);
       setImageFile(null);
+      setSelectedTags([]);
 
     } catch (err) {
       console.error('Failed to create product:', err);
@@ -248,6 +313,23 @@ export const AddDishForm = ({ closeModal }) => {
             {dishImage && (
               <img src={dishImage} alt="Dish" className="dish-image-preview" />
             )}
+          </label>
+
+          <label className="tags-label">
+            Tags:
+            <Select
+              isMulti
+              options={tagOptions}
+              value={selectedTags}
+              onChange={setSelectedTags}
+              styles={customStyles}
+              isDisabled={isSubmitting || status === 'loading'}
+              placeholder={status === 'loading' ? 'Loading tags...' : 'Select tags...'}
+              className="tags-select"
+              closeMenuOnSelect={false}
+              noOptionsMessage={() => "No tags available"}
+              isLoading={status === 'loading'}
+            />
           </label>
 
           <button 

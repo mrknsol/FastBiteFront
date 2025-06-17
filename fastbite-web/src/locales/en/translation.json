@@ -1,0 +1,12 @@
+{
+  "ai": {
+    "input": {
+      "placeholder": "Ask for product recommendations..."
+    },
+    "send": "Send",
+    "sending": "Sending...",
+    "error": {
+      "recommendation": "Error getting recommendations"
+    }
+  }
+} 

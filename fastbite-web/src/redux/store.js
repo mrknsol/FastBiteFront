@@ -8,6 +8,9 @@ import productSlice from './reducers/productSlice';
 import reservationSlice from './reducers/reservationSlice';
 import partySlice from './reducers/partySlice';
 import languageSlice from './reducers/languageSlice';
+import aiRecommendationReducer from './reducers/aiRecommendationSlice';
+import productTagsReducer from './reducers/productTagsSlice';
+
 export const store = configureStore({
   reducer: {
     auth: authSlice,
@@ -18,7 +21,9 @@ export const store = configureStore({
     recaptcha: recaptchaSlice,
     products: productSlice,
     reservation: reservationSlice,
-    language: languageSlice
+    language: languageSlice,
+    aiRecommendation: aiRecommendationReducer,
+    productTags: productTagsReducer,
   },   
 });
 

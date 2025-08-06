@@ -1,7 +1,17 @@
 import "./AdminPanelMainPage.css";
+import { useDispatch } from "react-redux";
 import { Greetings, ReservationsHistory, ButtonsBlock, OrdersHistory, Users, MenuList } from "../../components/AdminPanelComps";
+import { useEffect } from "react";
+import { fetchOrders, fetchReservations } from "../../redux/reducers/profileSlice";
 
 export const AdminPanelMainPage = () => {
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchOrders()),
+    dispatch(fetchReservations());
+  }, [dispatch]);
   
   return (
     <div className="admin-panel">
@@ -24,9 +34,6 @@ export const AdminPanelMainPage = () => {
           <Users />
         </div>
         <div className="admin-comps div7"></div>
-
- 
-        
       </div>
     </div>
   );

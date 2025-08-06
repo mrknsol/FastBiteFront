@@ -130,7 +130,7 @@ export const ReservePage = () => {
       totalPrice: orders.total,
       tableNumber: parseInt(table),
       confirmationDate: new Date().toISOString(),
-      productNames: Object.entries(orders.items).map(([id, item]) => ({
+      productNames: Object.values(orders.items).map((item) => ({
         productName: item.name,
         quantity: item.quantity
       })),
@@ -213,6 +213,10 @@ export const ReservePage = () => {
       const productName =
         product.translations.find((t) => t.languageCode === "en")?.name ||
         product.name;
+      const currentQty = orders.items[productName]?.quantity || 0;
+      const qty = orders.items[productName]?.quantity || 0;
+
+      
 
       switch (action) {
         case "ADD":
@@ -227,7 +231,6 @@ export const ReservePage = () => {
           break;
 
         case "INCREASE":
-          const currentQty = orders.items[productName]?.quantity || 0;
           dispatch(
             updateOrderItemQuantity({
               id: productName,
@@ -237,7 +240,6 @@ export const ReservePage = () => {
           break;
 
         case "DECREASE":
-          const qty = orders.items[productName]?.quantity || 0;
           if (qty === 1) {
             dispatch(removeOrderItem({ id: productName }));
           } else {
@@ -388,7 +390,7 @@ export const ReservePage = () => {
               totalPrice: orders.total,
               tableNumber: parseInt(table),
               confirmationDate: new Date().toISOString(),
-              productNames: Object.entries(orders.items).map(([id, item]) => ({
+              productNames: Object.values(orders.items).map((item) => ({
                 productName: item.name,
                 quantity: item.quantity
               })),

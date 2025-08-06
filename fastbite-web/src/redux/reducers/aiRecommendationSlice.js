@@ -64,7 +64,7 @@ const aiRecommendationSlice = createSlice({
         state.error = action.payload;
         state.chatHistory.push({
           type: 'error',
-          message: 'Произошла ошибка при получении рекомендаций'
+          message: 'Error occurred while fetching data.'
         });
       });
   }

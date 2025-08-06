@@ -5,14 +5,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { updateReservation, deleteReservation } from "../../../../redux/reducers/reservationSlice";
 import { fetchUsers } from "../../../../redux/reducers/profileSlice";
 
-export const SearchReservationHistoryForm = ({ reservations }) => {
+export const SearchReservationHistoryForm = () => {
   const dispatch = useDispatch();
-  const [searchResults, setSearchResults] = useState(reservations || []);
-  const [searchCriteria, setSearchCriteria] = useState({
-    name: "",
-    date: "",
-  });
   const users = useSelector((state) => state.profile.users);
+  const reservations = useSelector((state) => state.profile.reservations);
+
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchCriteria, setSearchCriteria] = useState({ name: "", date: "" });
+
   const [editingReservation, setEditingReservation] = useState(null);
   const [editedReservation, setEditedReservation] = useState({
     id: null,
@@ -31,9 +31,14 @@ export const SearchReservationHistoryForm = ({ reservations }) => {
     }
   });
 
+
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
+
+  useEffect(() => {
+    setSearchResults(reservations || []);
+  }, [reservations]);
 
   const getUserInfo = (userId) => {
     if (!Array.isArray(users) || users.length === 0) {

@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import Cookies from 'js-cookie';
 import ApiManager from '../../apiManager';
-import axios from 'axios';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -194,7 +192,6 @@ const reservationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Обработка fetchTables
       .addCase(fetchTables.pending, (state) => {
         state.status = 'loading';
       })
@@ -207,13 +204,11 @@ const reservationSlice = createSlice({
         state.status = 'failed';
         state.error = action.error.message;
       })
-      // Обработка createReservation
       .addCase(createReservation.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(createReservation.fulfilled, (state, action) => {
+      .addCase(createReservation.fulfilled, (state) => {
         state.status = 'succeeded';
-        // Можно добавить дополнительную логику при успешном создании
       })
       .addCase(createReservation.rejected, (state, action) => {
         state.status = 'failed';

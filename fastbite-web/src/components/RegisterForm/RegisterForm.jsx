@@ -8,6 +8,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import successIcon from "../../assets/icons/confetti.apng";
 import signUpUser from "../../models/signUpUser";
 import { useTranslation } from 'react-i18next';
+import Loader from "../Loader/Loader"
 
 export const RegisterForm = ({ onLoginClick, closeModal }) => {
   const { t } = useTranslation();
@@ -16,7 +17,8 @@ export const RegisterForm = ({ onLoginClick, closeModal }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const siteKey = useSelector((state) => state.recaptcha.siteKey);
-  const loading = useSelector((state) => state.recaptcha.loading);
+  const recaptchaLoading = useSelector((state) => state.recaptcha.loading);
+  const authLoading = useSelector((state) => state.auth.loading);
   const error = useSelector((state) => state.recaptcha.error);
   const [errors, setErrors] = useState({});
 
@@ -81,151 +83,168 @@ export const RegisterForm = ({ onLoginClick, closeModal }) => {
   }, [successMessage, closeModal]);
 
   return (
-    <div className={`register-container ${successMessage ? "success" : ""}`}>
-      <div className="register-left">
-        {successMessage ? (
-          <div className="success-message">
-            <h1>{t('register.success')}</h1>
-            <img src={successIcon} alt="Success" />
-          </div>
-        ) : (
-          <form className="register-form-container" onSubmit={handleSubmit}>
-            <h1>{t('register.title')}</h1>
-            <div className="register-input-box">
-              <input
-                type="text"
-                id="name"
-                placeholder={t('register.fields.name')}
-                value={user.name}
-                onChange={handleInputChange}
-                required
-                className={errors.name ? 'error' : ''}
-              />
-              <FaUser className="register-icon" />
-              {errors.name && (
-                <div className="field-error-message">
-                  <FaExclamationCircle className="error-icon" />
-                  <span>{errors.name}</span>
-                </div>
-              )}
+    <>
+      {authLoading && (
+        <div className="register-loader-overlay active">
+          <Loader />
+        </div>
+      )}
+  
+      <div className={`register-container ${successMessage ? "success" : ""}`}>
+        <div className="register-left">
+          {successMessage ? (
+            <div className="success-message">
+              <h1>{t('register.success')}</h1>
+              <img src={successIcon} alt="Success" />
             </div>
-            <div className="register-input-box">
-              <input
-                type="text"
-                id="surname"
-                placeholder={t('register.fields.surname')}
-                value={user.surname}
-                onChange={handleInputChange}
-                required
-                className={errors.surname ? 'error' : ''}
-              />
-              <FaUser className="register-icon" />
-              {errors.surname && (
-                <div className="field-error-message">
-                  <FaExclamationCircle className="error-icon" />
-                  <span>{errors.surname}</span>
-                </div>
-              )}
-            </div>
-            <div className="register-input-box">
-              <input
-                type="email"
-                id="email"
-                placeholder="Email"
-                value={user.email}
-                onChange={handleInputChange}
-                required
-                className={errors.email ? 'error' : ''}
-              />
-              <FaEnvelope className="register-icon" />
-              {errors.email && (
-                <div className="field-error-message">
-                  <FaExclamationCircle className="error-icon" />
-                  <span>{errors.email}</span>
-                </div>
-              )}
-            </div>
-            <div className="register-input-box">
-              <input
-                type="text"
-                id="phoneNumber"
-                placeholder="Phone Number"
-                value={user.phoneNumber}
-                onChange={handleInputChange}
-                required
-                className={errors.phoneNumber ? 'error' : ''}
-              />
-              <FaEnvelope className="register-icon" />
-              {errors.phoneNumber && (
-                <div className="field-error-message">
-                  <FaExclamationCircle className="error-icon" />
-                  <span>{errors.phoneNumber}</span>
-                </div>
-              )}
-            </div>
-            <div className="register-input-box">
-              <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                value={user.password}
-                onChange={handleInputChange}
-                required
-                className={errors.password ? 'error' : ''}
-              />
-              <FaLock className="register-icon" />
-              {errors.password && (
-                <div className="field-error-message">
-                  <FaExclamationCircle className="error-icon" />
-                  <span>{errors.password}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="register-input-box">
-              <input
-                type="password"
-                id="confirmPassword"
-                placeholder="Confirm Password"
-                value={user.confirmPassword}
-                onChange={handleInputChange}
-                required
-                className={errors.confirmPassword ? 'error' : ''}
-              />
-              <FaLock className="register-icon" />
-              {errors.confirmPassword && (
-                <div className="field-error-message">
-                  <FaExclamationCircle className="error-icon" />
-                  <span>{errors.confirmPassword}</span>
-                </div>
-              )}
-            </div>
-
-            {!loading && siteKey ? (
-              <ReCAPTCHA
-                sitekey={siteKey}
-                onChange={handleRecaptchaChange}
-              />
-            ) : (
-              <p>{t('register.loading')}</p>
-            )}
-
-            {error && <p>Error loading reCAPTCHA: {error}</p>} 
-            {errors.general && (
-              <div className="error-message">
-                <FaExclamationCircle className="error-icon" />
-                <span>{errors.general}</span>
+          ) : (
+            <form className="register-form-container" onSubmit={handleSubmit}>
+              <h1>{t('register.title')}</h1>
+  
+              <div className="register-input-box">
+                <input
+                  type="text"
+                  id="name"
+                  placeholder={t('register.fields.name')}
+                  value={user.name}
+                  onChange={handleInputChange}
+                  required
+                  className={errors.name ? 'error' : ''}
+                />
+                <FaUser className="register-icon" />
+                {errors.name && (
+                  <div className="field-error-message">
+                    <FaExclamationCircle className="error-icon" />
+                    <span>{errors.name}</span>
+                  </div>
+                )}
               </div>
-            )}
-            <button type="submit">{t('register.buttons.signUp')}</button>
-          </form>
-        )}
+  
+              <div className="register-input-box">
+                <input
+                  type="text"
+                  id="surname"
+                  placeholder={t('register.fields.surname')}
+                  value={user.surname}
+                  onChange={handleInputChange}
+                  required
+                  className={errors.surname ? 'error' : ''}
+                />
+                <FaUser className="register-icon" />
+                {errors.surname && (
+                  <div className="field-error-message">
+                    <FaExclamationCircle className="error-icon" />
+                    <span>{errors.surname}</span>
+                  </div>
+                )}
+              </div>
+  
+              <div className="register-input-box">
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Email"
+                  value={user.email}
+                  onChange={handleInputChange}
+                  required
+                  className={errors.email ? 'error' : ''}
+                />
+                <FaEnvelope className="register-icon" />
+                {errors.email && (
+                  <div className="field-error-message">
+                    <FaExclamationCircle className="error-icon" />
+                    <span>{errors.email}</span>
+                  </div>
+                )}
+              </div>
+  
+              <div className="register-input-box">
+                <input
+                  type="text"
+                  id="phoneNumber"
+                  placeholder="Phone Number"
+                  value={user.phoneNumber}
+                  onChange={handleInputChange}
+                  required
+                  className={errors.phoneNumber ? 'error' : ''}
+                />
+                <FaEnvelope className="register-icon" />
+                {errors.phoneNumber && (
+                  <div className="field-error-message">
+                    <FaExclamationCircle className="error-icon" />
+                    <span>{errors.phoneNumber}</span>
+                  </div>
+                )}
+              </div>
+  
+              <div className="register-input-box">
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Password"
+                  value={user.password}
+                  onChange={handleInputChange}
+                  required
+                  className={errors.password ? 'error' : ''}
+                />
+                <FaLock className="register-icon" />
+                {errors.password && (
+                  <div className="field-error-message">
+                    <FaExclamationCircle className="error-icon" />
+                    <span>{errors.password}</span>
+                  </div>
+                )}
+              </div>
+  
+              <div className="register-input-box">
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={user.confirmPassword}
+                  onChange={handleInputChange}
+                  required
+                  className={errors.confirmPassword ? 'error' : ''}
+                />
+                <FaLock className="register-icon" />
+                {errors.confirmPassword && (
+                  <div className="field-error-message">
+                    <FaExclamationCircle className="error-icon" />
+                    <span>{errors.confirmPassword}</span>
+                  </div>
+                )}
+              </div>
+  
+              {!recaptchaLoading && siteKey ? (
+                <ReCAPTCHA
+                  sitekey={siteKey}
+                  onChange={handleRecaptchaChange}
+                />
+              ) : (
+                <p>{t('register.loading')}</p>
+              )}
+  
+              {error && <p>Error loading reCAPTCHA: {error}</p>}
+              {errors.general && (
+                <div className="error-message">
+                  <FaExclamationCircle className="error-icon" />
+                  <span>{errors.general}</span>
+                </div>
+              )}
+  
+              <button type="submit" disabled={authLoading}>
+                {authLoading ? t('register.loading') : t('register.buttons.signUp')}
+              </button>
+            </form>
+          )}
+        </div>
+  
+        <div className="register-right">
+          <h2>{t('register.welcome.title')}</h2>
+          <p>{t('register.welcome.message')}</p>
+          <button onClick={onLoginClick}>{t('register.buttons.signIn')}</button>
+        </div>
       </div>
-      <div className="register-right">
-        <h2>{t('register.welcome.title')}</h2>
-        <p>{t('register.welcome.message')}</p>
-        <button onClick={onLoginClick}>{t('register.buttons.signIn')}</button>
-      </div>
-    </div>
+    </>
   );
 };

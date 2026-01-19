@@ -4,6 +4,7 @@ import { Navbar } from "../../components/Navbar/Navbar";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchReservations } from "../../redux/reducers/profileSlice";
+import Loader from "../../components/Loader/Loader";
 
 export const ReserveHistory = () => {
   const { t } = useTranslation();
@@ -47,7 +48,7 @@ export const ReserveHistory = () => {
           {t('reserveHistory.title.main')}
         </h2>
 
-        {loading && <p>{t('reserveHistory.status.loading')}</p>}
+        {loading && <Loader />}
         {error && <p className="ReserveHistory__error">
           {t('reserveHistory.status.error', { message: error })}
         </p>}

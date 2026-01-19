@@ -26,6 +26,7 @@ import {
 import { PartyCodeModal } from '../../components/PartyCodeModal/PartyCodeModal';
 import { JoinPartyModal } from '../../components/JoinPartyModal/JoinPartyModal';
 import { fetchProducts } from "../../redux/reducers/productSlice";
+import  Loader from '../../components/Loader/Loader.jsx'
 
 export const OrderPage = () => {
   const { t, i18n } = useTranslation();
@@ -41,6 +42,7 @@ export const OrderPage = () => {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const connectionRef = useRef(null);
   const [receiptData, setReceiptData] = useState(null);
+  const orderStatus = useSelector((state) => state.order.orderStatus)
 
   const order = useSelector((state) => {
     const currentPartyId = localStorage.getItem('currentPartyId');
@@ -89,7 +91,7 @@ export const OrderPage = () => {
     let mounted = true;
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5156/orderHub", {
+      .withUrl("http://localhost:5296/orderHub", {
         skipNegotiation: false,
         transport: signalR.HttpTransportType.WebSockets
       })
@@ -473,158 +475,177 @@ export const OrderPage = () => {
         </div>
         <Navbar />
       </div>
+  
       <div className="OrderPage__right-side">
-        {showReceipt ? (
-          <div className="OrderPage__receipt-container">
-            <OrderReceipt
-              order={receiptData?.order || []}
-              totalPrice={receiptData?.totalPrice || 0}
-            />
-            <button
-              className="OrderPage__new-order-button"
-              onClick={() => {
-                setShowReceipt(false);
-                setReceiptData(null);
-                handleNewOrder();
-              }}
-            >
-              {t("order.newOrder")}
-            </button>
+        {orderStatus === "loading" ? (
+          <div className="OrderPage__loader">
+            <Loader />
           </div>
-        ) : !isPaymentFormVisible ? (
+        ) : (
           <>
-            <div className="OrderPage__order-list">
-              {order.length > 0 ? (
-                order.map((dish, index) => (
-                  <div
-                    key={`order-item-${Date.now()}-${index}-${dish.id}`}
-                    className="OrderPage__order-item"
-                  >
-                    <div className="OrderPage__order-item-details">
-                      <span className="card-name">
-                        {getTranslation(dish).name}
-                      </span>
-                      <span className="card-desc">
-                        {getTranslation(dish).description}
-                      </span>
-                    </div>
-                    <div className="OrderPage__order-item-price">
-                      ${dish.price}
-                      <button
-                        className="OrderPage__remove-button"
-                        onClick={() => handleRemoveProduct(dish.id)}
-                      >
-                        {t("order.remove")}
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="OrderPage__empty-order">
-                  {t("order.emptyOrder")}
-                </p>
-              )}
-            </div>
-            <div className="OrderPage__total">
-              <h2>
-                {t("order.total")}: ${totalPrice}
-              </h2>
-
-              <div className="OrderPage__table-select">
-                {!isInParty ? (
-                  <>
-                    <label htmlFor="tableSelect">{t("order.selectTable")}: </label>
-                    <select
-                      id="tableSelect"
-                      value={selectedTable}
-                      onChange={(e) => setSelectedTable(e.target.value)}
-                      required
-                    >
-                      <option key="default" value="">{t("order.chooseTable")}</option>
-                      {tables.map((table) => (
-                        <option key={`table-${table.tableNumber}`} value={table.tableNumber}>
-                          {t("order.tableNumber")} {table.tableNumber}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                ) : (
-                  <div className="OrderPage__party-table">
-                    {t("order.tableNumber")} {partyData?.tableId}
-                  </div>
-                )}
+            {showReceipt ? (
+              <div className="OrderPage__receipt-container">
+                <OrderReceipt
+                  order={receiptData?.order || []}
+                  totalPrice={receiptData?.totalPrice || 0}
+                />
+                <button
+                  className="OrderPage__new-order-button"
+                  onClick={() => {
+                    setShowReceipt(false);
+                    setReceiptData(null);
+                    handleNewOrder();
+                  }}
+                >
+                  {t("order.newOrder")}
+                </button>
               </div>
-
-              <div className="OrderPage__buttons">
-                <button
-                  className="OrderPage__confirm-button"
-                  onClick={handleConfirmOrder}
-                >
-                  {t("order.confirmOrder")}
-                </button>
-                <button
-                  className="OrderPage__clear-button"
-                  onClick={handleClearOrder}
-                >
-                  {t("order.clearOrder")}
-                </button>
-                {isInParty ? (
-                  <button 
-                    className="OrderPage__party-button"
-                    onClick={() => {
-                      console.log('Current Party ID:', currentPartyId);
-                      setShowPartyModal(true);
-                    }}
-                  >
-                    {t("order.showParty")}
-                  </button>
-                ) : (
-                  <>
-                    <button 
-                      className="OrderPage__party-button"
-                      onClick={handleCreateParty}
+            ) : !isPaymentFormVisible ? (
+              <>
+                <div className="OrderPage__order-list">
+                  {order.length > 0 ? (
+                    order.map((dish, index) => (
+                      <div
+                        key={`order-item-${Date.now()}-${index}-${dish.id}`}
+                        className="OrderPage__order-item"
+                      >
+                        <div className="OrderPage__order-item-details">
+                          <span className="card-name">
+                            {getTranslation(dish).name}
+                          </span>
+                          <span className="card-desc">
+                            {getTranslation(dish).description}
+                          </span>
+                        </div>
+                        <div className="OrderPage__order-item-price">
+                          ${dish.price}
+                          <button
+                            className="OrderPage__remove-button"
+                            onClick={() => handleRemoveProduct(dish.id)}
+                          >
+                            {t("order.remove")}
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="OrderPage__empty-order">
+                      {t("order.emptyOrder")}
+                    </p>
+                  )}
+                </div>
+  
+                <div className="OrderPage__total">
+                  <h2>
+                    {t("order.total")}: ${totalPrice}
+                  </h2>
+  
+                  <div className="OrderPage__table-select">
+                    {!isInParty ? (
+                      <>
+                        <label htmlFor="tableSelect">{t("order.selectTable")}: </label>
+                        <select
+                          id="tableSelect"
+                          value={selectedTable}
+                          onChange={(e) => setSelectedTable(e.target.value)}
+                          required
+                        >
+                          <option key="default" value="">
+                            {t("order.chooseTable")}
+                          </option>
+                          {tables.map((table) => (
+                            <option
+                              key={`table-${table.tableNumber}`}
+                              value={table.tableNumber}
+                            >
+                              {t("order.tableNumber")} {table.tableNumber}
+                            </option>
+                          ))}
+                        </select>
+                      </>
+                    ) : (
+                      <div className="OrderPage__party-table">
+                        {t("order.tableNumber")} {partyData?.tableId}
+                      </div>
+                    )}
+                  </div>
+  
+                  <div className="OrderPage__buttons">
+                    <button
+                      className="OrderPage__confirm-button"
+                      onClick={handleConfirmOrder}
                     >
-                      {t("order.createParty")}
+                      {t("order.confirmOrder")}
                     </button>
                     <button
-                      className="OrderPage__party-button"
-                      onClick={() => setShowJoinModal(true)}
+                      className="OrderPage__clear-button"
+                      onClick={handleClearOrder}
                     >
-                      {t("order.joinParty")}
+                      {t("order.clearOrder")}
                     </button>
-                  </>
-                )}
-              </div>
-            </div>
+                    {isInParty ? (
+                      <button
+                        className="OrderPage__party-button"
+                        onClick={() => {
+                          console.log("Current Party ID:", currentPartyId);
+                          setShowPartyModal(true);
+                        }}
+                      >
+                        {t("order.showParty")}
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          className="OrderPage__party-button"
+                          onClick={handleCreateParty}
+                        >
+                          {t("order.createParty")}
+                        </button>
+                        <button
+                          className="OrderPage__party-button"
+                          onClick={() => setShowJoinModal(true)}
+                        >
+                          {t("order.joinParty")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <PaymentForm
+                totalPrice={totalPrice}
+                onSuccess={handlePaymentSuccess}
+                onCancel={handleCancelPayment}
+                clientId={clientId}
+                source="order"
+                orderData={{
+                  userId: user.id,
+                  totalPrice: totalPrice,
+                  tableNumber: isInParty
+                    ? partyData?.tableId
+                    : parseInt(selectedTable),
+                  products: order.map((dish) => ({
+                    productId: dish.id,
+                    productName: getTranslation(dish).name,
+                    quantity: dish.quantity || 1,
+                  })),
+                }}
+              />
+            )}
           </>
-        ) : (
-          <PaymentForm
-            totalPrice={totalPrice}
-            onSuccess={handlePaymentSuccess}
-            onCancel={handleCancelPayment}
-            clientId={clientId}
-            source="order"
-            orderData={{
-              userId: user.id,
-              totalPrice: totalPrice,
-              tableNumber: isInParty ? partyData?.tableId : parseInt(selectedTable),
-              products: order.map(dish => ({
-                productId: dish.id,
-                productName: getTranslation(dish).name,
-                quantity: dish.quantity || 1,
-              }))
-            }}
-          />
         )}
       </div>
+  
       {showPartyModal && currentPartyId && (
-        <PartyCodeModal 
+        <PartyCodeModal
           partyId={currentPartyId}
           userId={user.id}
           onClose={handleCloseModal}
           onLeave={handleLeaveParty}
         />
       )}
+  
       {showJoinModal && (
         <JoinPartyModal
           userId={user.id}

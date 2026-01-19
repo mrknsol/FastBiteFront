@@ -246,6 +246,7 @@ const profileSlice = createSlice({
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+        console.log("Is Authenticated turned false in profileSlice in fetchUserProfile case")
         state.isAuthenticated = false;
         state.user = null;
       })

@@ -18,7 +18,6 @@ export const TableCanvas = ({
     
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Размеры и отступы
     const smallTableWidth = 60;
     const smallTableHeight = 60;
     const largeTableWidth = 100;
@@ -31,13 +30,11 @@ export const TableCanvas = ({
     const drawTable = (x, y, width, height, tableId, isLarge) => {
       tablePositions[tableId] = { x, y, width, height };
 
-      // Тень для стола
       ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
       ctx.shadowBlur = 6;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 2;
 
-      // Рисуем стол
       ctx.beginPath();
       ctx.fillStyle = '#FFE9C4';
       ctx.strokeStyle = '#DEB887';
@@ -46,15 +43,12 @@ export const TableCanvas = ({
       ctx.fill();
       ctx.stroke();
 
-      // Сбрасываем тень для остальных элементов
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // Рисуем стулья
       const drawChair = (chairX, chairY) => {
-        // Тень для стула
         ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
         ctx.shadowBlur = 4;
         ctx.shadowOffsetX = 1;
@@ -65,7 +59,6 @@ export const TableCanvas = ({
         ctx.arc(chairX, chairY, 8, 0, Math.PI * 2);
         ctx.fill();
 
-        // Блик на стуле
         ctx.beginPath();
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.arc(chairX - 2, chairY - 2, 3, 0, Math.PI * 2);
@@ -77,7 +70,6 @@ export const TableCanvas = ({
 
       const chairOffset = 15;
 
-      // Расставляем стулья
       if (isLarge) {
         drawChair(x + width * 0.25, y - chairOffset);
         drawChair(x + width * 0.75, y - chairOffset);
@@ -92,14 +84,12 @@ export const TableCanvas = ({
         drawChair(x - chairOffset, y + height * 0.5);
       }
 
-      // Выделение выбранного стола
       if (selectedTable === tableId) {
         ctx.fillStyle = 'rgba(255, 165, 0, 0.2)';
         ctx.roundRect(x, y, width, height, 5);
         ctx.fill();
       }
 
-      // Если есть резервации
       const table = tables.find(t => t.tableNumber.toString() === tableId);
       if (table?.reservationsOnDate?.length > 0) {
         ctx.fillStyle = 'rgba(255, 99, 71, 0.15)';
@@ -107,7 +97,6 @@ export const TableCanvas = ({
         ctx.fill();
       }
 
-      // Номер стола
       const text = `#${tableId}`;
       ctx.font = 'bold 14px Arial';
       ctx.fillStyle = '#4A4A4A';
@@ -118,7 +107,6 @@ export const TableCanvas = ({
 
     const tablePositions = {};
 
-    // Отрисовка всех столов
     tables.forEach((table) => {
       const tableId = table.tableNumber.toString();
       const isLarge = table.tableCapacity > 4;
@@ -128,15 +116,12 @@ export const TableCanvas = ({
 
       let x, y;
       if (tableNum <= 2) {
-        // Верхний ряд
         x = startX + ((tableNum - 1) * horizontalSpacing);
         y = startY;
       } else if (tableNum <= 4) {
-        // Средний ряд
         x = startX + ((tableNum - 3) * horizontalSpacing);
         y = startY + verticalSpacing;
       } else {
-        // Нижний ряд (большие столы)
         x = startX - 40 + ((tableNum - 5) * horizontalSpacing);
         y = startY + (verticalSpacing * 2);
       }
@@ -147,7 +132,6 @@ export const TableCanvas = ({
     canvasRef.current.tablePositions = tablePositions;
   };
 
-  // Обновленная функция обработки кликов
   const handleCanvasClick = (e) => {
     if (isBlurred) return;
 
@@ -156,7 +140,6 @@ export const TableCanvas = ({
     const y = e.clientY - rect.top;
     const tablePositions = canvasRef.current.tablePositions;
 
-    // Проверяем попадание клика в область стола
     for (const [tableId, position] of Object.entries(tablePositions)) {
       if (
         x >= position.x && 

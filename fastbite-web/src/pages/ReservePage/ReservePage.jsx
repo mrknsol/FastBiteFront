@@ -11,10 +11,13 @@ import {
   removeOrderItem,
   updateOrderItemQuantity,
   resetReservation,
+  clearError,
 } from "../../redux/reducers/reservationSlice";
 import { fetchProducts } from "../../redux/reducers/productSlice";
 import { PaymentForm } from "../../components/PaymentForm/PaymentForm";
 import { fetchClientId } from "../../redux/reducers/paymentSlice";
+import  Loader from '../../components/Loader/Loader.jsx'
+
  
 export const ReservePage = () => {
   const { t } = useTranslation();
@@ -25,6 +28,7 @@ export const ReservePage = () => {
   const [reservationData, setReservationData] = useState(null);
 
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [modalContent, setModalContent] = useState("");
 
   const [date, setDate] = useState("");
@@ -120,7 +124,9 @@ export const ReservePage = () => {
     if (hasOrder) {
       setPaymentFormVisible(true);
     } else {
+      setIsConfirming(true);
       await createReservationHandler(null);
+      setIsConfirming(false);
     }
   };
 
@@ -136,7 +142,9 @@ export const ReservePage = () => {
       })),
     };
 
+    setIsConfirming(true);
     await createReservationHandler(orderData);
+    setIsConfirming(false);
     setPaymentFormVisible(false);
   };
 
@@ -182,8 +190,10 @@ export const ReservePage = () => {
       } else {
         setModalContent(t("reserve.modal.generalError"));
       }
-      
+
+      dispatch(clearError());
       setModalOpen(true);
+      setIsConfirming(false);
     }
   };
 
@@ -213,10 +223,6 @@ export const ReservePage = () => {
       const productName =
         product.translations.find((t) => t.languageCode === "en")?.name ||
         product.name;
-      const currentQty = orders.items[productName]?.quantity || 0;
-      const qty = orders.items[productName]?.quantity || 0;
-
-      
 
       switch (action) {
         case "ADD":
@@ -231,6 +237,7 @@ export const ReservePage = () => {
           break;
 
         case "INCREASE":
+          const currentQty = orders.items[productName]?.quantity || 0;
           dispatch(
             updateOrderItemQuantity({
               id: productName,
@@ -240,6 +247,7 @@ export const ReservePage = () => {
           break;
 
         case "DECREASE":
+          const qty = orders.items[productName]?.quantity || 0;
           if (qty === 1) {
             dispatch(removeOrderItem({ id: productName }));
           } else {
@@ -359,6 +367,8 @@ export const ReservePage = () => {
       setModalOpen(false);
     }
   };
+  const isLoadingOverlayActive =
+    status === "loading" || isConfirming === true;
 
   return (
     <div className="ReservePage">
@@ -377,6 +387,11 @@ export const ReservePage = () => {
         <Navbar />
       </div>
       <div className="ReservePage__right-side">
+        {isLoadingOverlayActive && (
+          <div className="reserve-loader-overlay active">
+            <Loader />
+          </div>
+        )}
         {isPaymentFormVisible ? (
           <PaymentForm
             totalPrice={orders.total}
@@ -390,7 +405,7 @@ export const ReservePage = () => {
               totalPrice: orders.total,
               tableNumber: parseInt(table),
               confirmationDate: new Date().toISOString(),
-              productNames: Object.values(orders.items).map((item) => ({
+              productNames: Object.entries(orders.items).map(([id, item]) => ({
                 productName: item.name,
                 quantity: item.quantity
               })),

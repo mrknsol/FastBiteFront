@@ -3,13 +3,12 @@ import ApiManager from '../../apiManager';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-
 export const fetchTables = createAsyncThunk(
   "reservation/fetchTables",
   async (date) => {
     try {
       const apiData = {
-        Url: `${baseUrl}/api/v1/Table/Get`, 
+        Url: `${baseUrl}/api/v1/Table/Get`,
         Params: { dateString: date },
         Method: "GET",
         Headers: {
@@ -18,20 +17,16 @@ export const fetchTables = createAsyncThunk(
       };
 
       const data = await ApiManager.apiRequest(apiData);
-      console.log(data);
       return data;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 );
-
-
 export const createReservation = createAsyncThunk(
   'reservation/createReservation',
   async (reservationData, { rejectWithValue }) => {
     try {
-      console.log(reservationData);
       const apiData = {
         Url: `${baseUrl}/api/v1/Reservation/Create`,
         Method: 'POST',
@@ -123,8 +118,9 @@ const reservationSlice = createSlice({
       total: 0,
     },
     tables: [],
-    status: 'idle',
-    error: null
+    status: 'idle', 
+    error: null,
+    isCreatingReservation: false, 
   },
   reducers: {
     setSelectedTable: (state, action) => {
@@ -141,34 +137,30 @@ const reservationSlice = createSlice({
     },
     addOrderItem: (state, action) => {
       const { id, name, price, quantity } = action.payload;
-      console.log('Adding item:', action.payload);
-      state.orders.items[id] = {
-        name,
-        price,
-        quantity,
-      };
+      state.orders.items[id] = { name, price, quantity };
       state.orders.total = Object.values(state.orders.items)
-        .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
     },
     removeOrderItem: (state, action) => {
       const { id } = action.payload;
       delete state.orders.items[id];
       state.orders.total = Object.values(state.orders.items)
-        .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
     },
     updateOrderItemQuantity: (state, action) => {
       const { id, quantity } = action.payload;
       if (state.orders.items[id]) {
         state.orders.items[id].quantity = quantity;
         state.orders.total = Object.values(state.orders.items)
-          .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          .reduce((sum, item) => sum + item.price * item.quantity, 0);
       }
     },
     clearOrders: (state) => {
-      state.orders = {
-        items: {},
-        total: 0,
-      };
+      state.orders = { items: {}, total: 0 };
+    },
+    clearError: (state) => {
+      state.error = null;
+      if (state.status === "failed") state.status = "idle";
     },
     setReservationStatus: (state, action) => {
       state.status = action.payload;
@@ -182,13 +174,11 @@ const reservationSlice = createSlice({
       state.selectedDate = '';
       state.selectedTime = '';
       state.guestsCount = 1;
-      state.orders = {
-        items: {},
-        total: 0,
-      };
+      state.orders = { items: {}, total: 0 };
       state.status = 'idle';
       state.error = null;
-    }
+      state.isCreatingReservation = false; 
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -205,24 +195,28 @@ const reservationSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(createReservation.pending, (state) => {
-        state.status = 'loading';
+        state.isCreatingReservation = true; // ✅
+        state.error = null;
       })
       .addCase(createReservation.fulfilled, (state) => {
-        state.status = 'succeeded';
+        state.isCreatingReservation = false; // ✅
       })
       .addCase(createReservation.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message;
+        state.isCreatingReservation = false; // ✅
+        state.error = action.payload || action.error.message;
       })
+
       .addCase(fetchReservation.pending, (state) => {
         state.status = 'loading';
       })
       .addCase(fetchReservation.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.selectedTable = action.payload.tableId;
-        state.selectedDate = action.payload.date;
-        state.selectedTime = action.payload.time;
-        state.guestsCount = action.payload.guestsCount;
+        Object.assign(state, {
+          selectedTable: action.payload.tableId,
+          selectedDate: action.payload.date,
+          selectedTime: action.payload.time,
+          guestsCount: action.payload.guestsCount,
+        });
       })
       .addCase(fetchReservation.rejected, (state, action) => {
         state.status = 'failed';
@@ -233,10 +227,12 @@ const reservationSlice = createSlice({
       })
       .addCase(updateReservation.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.selectedTable = action.payload.tableId;
-        state.selectedDate = action.payload.date;
-        state.selectedTime = action.payload.time;
-        state.guestsCount = action.payload.guestsCount;
+        Object.assign(state, {
+          selectedTable: action.payload.tableId,
+          selectedDate: action.payload.date,
+          selectedTime: action.payload.time,
+          guestsCount: action.payload.guestsCount,
+        });
       })
       .addCase(updateReservation.rejected, (state, action) => {
         state.status = 'failed';
@@ -247,10 +243,12 @@ const reservationSlice = createSlice({
       })
       .addCase(deleteReservation.fulfilled, (state) => {
         state.status = 'succeeded';
-        state.selectedTable = null;
-        state.selectedDate = '';
-        state.selectedTime = '';
-        state.guestsCount = 1;
+        Object.assign(state, {
+          selectedTable: null,
+          selectedDate: '',
+          selectedTime: '',
+          guestsCount: 1,
+        });
       })
       .addCase(deleteReservation.rejected, (state, action) => {
         state.status = 'failed';
@@ -270,11 +268,13 @@ export const {
   clearOrders,
   setReservationStatus,
   setError,
+  clearError,
   resetReservation
 } = reservationSlice.actions;
 
 export const selectReservation = (state) => state.reservation;
 export const selectOrders = (state) => state.reservation.orders;
 export const selectReservationStatus = (state) => state.reservation.status;
+export const selectIsCreatingReservation = (state) => state.reservation.isCreatingReservation; // ✅
 
 export default reservationSlice.reducer;

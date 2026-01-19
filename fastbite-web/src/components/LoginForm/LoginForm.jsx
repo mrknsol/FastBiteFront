@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import signInUser from "../../models/signInUser";
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../Loader/Loader';
 
 export const LoginForm = ({ onRegisterClick, closeModal, onPasswordRecoveryClick }) => {
   const dispatch = useDispatch();
@@ -38,22 +39,18 @@ export const LoginForm = ({ onRegisterClick, closeModal, onPasswordRecoveryClick
 
   const getErrorMessage = (error) => {
     try {
-      // Если ошибка приходит в виде строки JSON
       if (typeof error === 'string' && error.includes('API Error')) {
         const errorObj = JSON.parse(error.split('API Error: 400 Bad Request.')[1]);
         
-        // Проверяем наличие ошибки валидации пароля
         if (errorObj.errorCode === 'RegularExpressionValidator') {
           return t('auth.login.error.passwordFormat');
         }
         
-        // Возвращаем сообщение об ошибке из API
         if (errorObj.errorMessage) {
           return errorObj.errorMessage;
         }
       }
       
-      // Для других типов ошибок
       if (Array.isArray(error)) {
         const err = error[0];
         if (err.propertyName === 'Password' && err.errorCode === 'RegularExpressionValidator') {
@@ -96,6 +93,12 @@ export const LoginForm = ({ onRegisterClick, closeModal, onPasswordRecoveryClick
 
   return (
     <div className={`login-container ${successMessage ? "success" : ""}`}>
+      {useSelector((state) => state.auth.loading) && (
+        <div className="login-loader-overlay active">
+          <Loader />
+        </div>
+      )}
+  
       <div className="login-left">
         {successMessage ? (
           <div className="success-message">
@@ -149,6 +152,7 @@ export const LoginForm = ({ onRegisterClick, closeModal, onPasswordRecoveryClick
           </form>
         )}
       </div>
+  
       {!successMessage && (
         <div className="login-right">
           <h2>{t('auth.login.welcomeBack')}</h2>

@@ -13,6 +13,26 @@
   padding: 40px;
 }
 
+.register-loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.register-loader-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
 .register-left {
   flex: 1;
   display: flex;

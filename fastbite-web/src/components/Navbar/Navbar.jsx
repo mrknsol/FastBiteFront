@@ -10,11 +10,13 @@ import { useTranslation } from 'react-i18next';
 export const Navbar = () => {
   const { t, i18n } = useTranslation();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const authChecked = useSelector((state) => state.auth.authChecked)
   const order = useSelector((state) => state.order.order);
   const orderCount = order.length;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+
 
   const handleLoginClick = () => {
     setIsModalOpen(true);
@@ -58,7 +60,7 @@ export const Navbar = () => {
           </Link>
         </div>
 
-        {!isAuthenticated && (
+        {authChecked && !isAuthenticated && (
           <div className="Navbar__item">
             <button className="Navbar__item-button" onClick={handleLoginClick}>
               {t('navbar.login')}
@@ -66,10 +68,12 @@ export const Navbar = () => {
           </div>
         )}
 
-        {isAuthenticated && (
+        {authChecked && isAuthenticated && (
           <div className="Navbar__item">
             <Link to="/profile">
-              <button className="Navbar__item-button">{t('navbar.profile')}</button>
+              <button className="Navbar__item-button">
+                {t('navbar.profile')}
+              </button>
             </Link>
           </div>
         )}

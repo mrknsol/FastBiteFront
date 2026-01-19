@@ -25,8 +25,9 @@ export const fetchSiteKey = createAsyncThunk(
   }
 );
 
+
 const recaptchaSlice = createSlice({
-  name: "recaptcha",
+  name: "recaptcha",  
   initialState: {
     siteKey: null,
     loading: false,

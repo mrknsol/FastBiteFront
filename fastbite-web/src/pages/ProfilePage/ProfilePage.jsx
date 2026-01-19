@@ -9,10 +9,11 @@ import {
 import { LogoutModal } from "../../components/LogoutModal/LogoutModal";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import Loader from "../../components/Loader/Loader.jsx";
 
 export const ProfilePage = () => {
   const { t } = useTranslation();
-  const { user, status, error } = useSelector((state) => state.profile);
+  const { user, status, error, updateStatus } = useSelector((state) => state.profile);
   const dispatch = useDispatch();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -62,6 +63,17 @@ export const ProfilePage = () => {
 
   return (
     <div className="ProfilePage">
+      {updateStatus === "loading" && (
+        <div className="profile-loader-overlay active">
+          <Loader />
+        </div>
+      )}
+      {status === "loading" && (
+        <div className="profile-loader-overlay active">
+          <Loader />
+        </div>
+      )}
+  
       <div className="ProfilePage__left-side">
         <div className="ProfilePage__background"></div>
         <div></div>
@@ -73,16 +85,14 @@ export const ProfilePage = () => {
             {t("profile.title.bottom")}
           </span>
         </div>
-
+  
         <Navbar />
       </div>
-
+  
       <div className="ProfilePage__right-side">
         <h2 className="ProfilePage__title">{t("profile.title.full")}</h2>
-
-        {status === "loading" ? (
-          <p>{t("profile.loading")}</p>
-        ) : error ? (
+  
+        {error ? (
           <p>{t("profile.error", { message: error })}</p>
         ) : (
           <div className="ProfilePage__info">
@@ -100,9 +110,7 @@ export const ProfilePage = () => {
                     className="ProfilePage__input"
                   />
                 ) : (
-                  <span className="ProfilePage__item-info">
-                    {user?.firstName}
-                  </span>
+                  <span className="ProfilePage__item-info">{user?.firstName}</span>
                 )}
               </div>
               <div className="ProfilePage-item">
@@ -118,13 +126,11 @@ export const ProfilePage = () => {
                     className="ProfilePage__input"
                   />
                 ) : (
-                  <span className="ProfilePage__item-info">
-                    {user?.lastName}
-                  </span>
+                  <span className="ProfilePage__item-info">{user?.lastName}</span>
                 )}
               </div>
             </div>
-
+  
             <div className="ProfilePage-item">
               <span className="ProfilePage__item-title">
                 {t("profile.fields.email")}
@@ -141,7 +147,7 @@ export const ProfilePage = () => {
                 <span className="ProfilePage__item-info">{user?.email}</span>
               )}
             </div>
-
+  
             <div className="ProfilePage-item">
               <span className="ProfilePage__item-title">
                 {t("profile.fields.phoneNumber")}
@@ -155,14 +161,12 @@ export const ProfilePage = () => {
                   className="ProfilePage__input"
                 />
               ) : (
-                <span className="ProfilePage__item-info">
-                  {user?.phoneNumber}
-                </span>
+                <span className="ProfilePage__item-info">{user?.phoneNumber}</span>
               )}
             </div>
           </div>
         )}
-
+  
         <div className="ProfilePage__buttons">
           {isEditing ? (
             <button className="ProfilePage__save-button" onClick={handleSave}>
@@ -185,6 +189,7 @@ export const ProfilePage = () => {
             </div>
           )}
         </div>
+  
         <div className="ProfilePage__extra-buttons">
           <Link to="/reserve-history">
             <button className="ProfilePage__navigation-button">
@@ -198,7 +203,7 @@ export const ProfilePage = () => {
           </Link>
         </div>
       </div>
-
+  
       {isModalOpen && <LogoutModal closeModal={closeModal} />}
     </div>
   );

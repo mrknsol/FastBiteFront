@@ -197,6 +197,7 @@ const loadUserFromStorage = () => {
     return {
       user: userData ? JSON.parse(userData) : null,
       isAuthenticated: isAuthenticated,
+      authChecked: !userData,
       loading: false,
       error: null,
       showPassword: false,
@@ -301,19 +302,14 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.loading = false;
         state.error = null;
+        state.authChecked = true;
         
         localStorage.removeItem('userData');
-        localStorage.removeItem('isAuthenticated');
+        localStorage.setItem('isAuthenticated', 'false');
       })
       .addCase(logout.rejected, (state, action) => {
         state.error = typeof action.payload === 'string' ? action.payload : 'Logout failed';
         state.loading = false;
-        state.user = null;
-        state.isAuthenticated = false;
-        state.accessToken = null;
-        state.refreshToken = null;
-        
-        window.location.reload();
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
         if (action.payload) {
@@ -324,19 +320,17 @@ const authSlice = createSlice({
             roles: action.payload.roles
           };
           state.isAuthenticated = true;
+          state.authChecked = true;
           state.error = null;
           
           localStorage.setItem('userData', JSON.stringify(state.user));
-          ('isAuthenticated', 'true');
+          localStorage.setItem('isAuthenticated', 'true');
         }
       })
       .addCase(refreshToken.rejected, (state, action) => {
         state.user = null;
-        state.isAuthenticated = false;
+        state.authChecked = true;
         state.error = action.payload || 'Token refresh failed';
-        
-        localStorage.clear();
-        localStorage.setItem('isAuthenticated', 'false');
       })
   },
 });

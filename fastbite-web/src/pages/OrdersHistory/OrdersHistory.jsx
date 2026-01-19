@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrders } from '../../redux/reducers/profileSlice';
 import React from 'react';
+import Loader from '../../components/Loader/Loader';
 
 export const OrdersHistory = () => {
   const { t } = useTranslation();
@@ -49,9 +50,7 @@ export const OrdersHistory = () => {
         </h2>
         
         {ordersStatus === 'loading' && (
-          <div className="OrdersHistory__loading">
-            {t('ordersHistory.status.loading')}
-          </div>
+          <Loader />
         )}
 
         {ordersError && (
